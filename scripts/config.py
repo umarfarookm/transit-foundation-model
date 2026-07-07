@@ -10,6 +10,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATASETS_DIR = PROJECT_ROOT / "datasets"
 RAW_DIR = DATASETS_DIR / "raw"
+CLEANED_DIR = DATASETS_DIR / "cleaned"
 CATALOG_DIR = DATASETS_DIR / "catalog"
 SEED_FEEDS_PATH = CATALOG_DIR / "seed_feeds.json"
 MOBILITY_DB_CSV_PATH = CATALOG_DIR / "mobility_db_feeds.csv"
