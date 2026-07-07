@@ -40,5 +40,7 @@ datasets/cleaned/
 datasets/synthetic/
 datasets/catalog/mobility_db_feeds.csv
 
-# Keep seed_feeds.json in version control (it's the curated feed list)
+# Keep curated files in version control
 !datasets/catalog/seed_feeds.json
+!datasets/synthetic/train.jsonl
+!datasets/synthetic/test.jsonl
