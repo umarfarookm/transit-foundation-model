@@ -40,7 +40,7 @@ FALLBACK_MODEL_ID = "HuggingFaceTB/SmolLM2-1.7B-Instruct"
 QLORA_CONFIG = {
     "r": 16,                      # LoRA rank — 16 is good for small models
     "lora_alpha": 32,             # Scaling factor — typically 2x rank
-    "lora_dropout": 0.05,         # Light dropout for regularization
+    "lora_dropout": 0,            # Must be 0 for 4-bit quantization with Unsloth
     "bias": "none",               # No bias adaptation
     "task_type": "CAUSAL_LM",     # Causal language modeling
     "target_modules": [           # Qwen2.5 attention + MLP modules
