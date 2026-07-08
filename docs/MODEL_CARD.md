@@ -11,8 +11,8 @@ tags:
   - unsloth
 language:
   - en
-datasets:
-  - custom (synthetic transit Q&A)
+dataset_info:
+  dataset_name: UmarTransit Synthetic Q&A
 pipeline_tag: text-generation
 ---
 
