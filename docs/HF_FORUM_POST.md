@@ -25,7 +25,7 @@ A QLoRA fine-tuned version of Qwen2.5-1.5B-Instruct that specializes in GTFS spe
 
 ## How it was built
 
-I'm a backend engineer (Java/Spring Boot, 12+ years) with zero AI/ML background before this project. Built the entire pipeline:
+I'm a Senior Technical Lead (Java/Spring Boot, 12+ years) experienced with LLM APIs (OpenAI, Claude) and GTFS/transit systems. This is my first end-to-end model training project — from data collection to fine-tuning to deployment. Built the entire pipeline:
 
 1. Collected 15 public GTFS feeds from 10 countries (858 MB raw data)
 2. Cleaned 77M+ rows into normalized Parquet files
