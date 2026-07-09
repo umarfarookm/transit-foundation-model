@@ -9,6 +9,8 @@
 
 A domain-specific foundation model for **public transit systems** and **GTFS (General Transit Feed Specification)** data, built from scratch as an end-to-end AI/ML engineering project.
 
+> **Data Disclaimer:** This project uses **only publicly available, open-source GTFS feeds** published by transit agencies for public use via the [Mobility Database](https://mobilitydatabase.org/). **No private, proprietary, or NDA-protected data** from any client, employer, or organization was used at any stage — data collection, training, or evaluation. All data sources are documented in [`datasets/catalog/seed_feeds.json`](datasets/catalog/seed_feeds.json).
+
 **Live Demo:** [transit-foundation-model.vercel.app](https://transit-foundation-model.vercel.app)
 **Model:** [huggingface.co/umarfarookm/UmarTransit-1B](https://huggingface.co/umarfarookm/UmarTransit-1B)
 **Documentation:** [Step-by-step build guide](docs/GUIDE.md)

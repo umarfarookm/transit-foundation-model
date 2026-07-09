@@ -2,6 +2,8 @@
 
 A comprehensive guide to building a domain-specific foundation model for public transit, from zero to deployment. This document covers every decision, concept, and command across all 12 phases.
 
+> **Data Disclaimer:** This project uses **only publicly available, open-source GTFS feeds** from the [Mobility Database](https://mobilitydatabase.org/). No private, proprietary, or NDA-protected data from any client, employer, or organization was used.
+
 ---
 
 ## Table of Contents

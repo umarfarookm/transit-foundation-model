@@ -28,6 +28,8 @@ UmarTransit-1B specializes in:
 - Transit network statistics
 - Cross-agency comparisons
 
+> **Data Disclaimer:** This model was trained **exclusively on publicly available, open-source GTFS feeds** published by transit agencies for public use via the [Mobility Database](https://mobilitydatabase.org/). **No private, proprietary, or NDA-protected data** from any client, employer, or organization was used at any stage.
+
 ## Model Details
 
 | Property | Value |
