@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  time?: number;
+  tokens?: number;
 }
 
-// Pre-computed demo answers from the actual model
 const DEMO_QA: Record<string, string> = {
   "What does route_type 3 mean in GTFS?":
     "In the GTFS specification, route_type 3 indicates Bus service. This is the most common route type and covers short- and long-distance bus routes.",
@@ -27,7 +34,13 @@ const DEMO_QA: Record<string, string> = {
     "GTFS defines four transfer types in transfers.txt: Type 0 is a recommended transfer point between routes. Type 1 is a timed transfer where the departing vehicle waits for the arriving vehicle. Type 2 requires a minimum transfer time (specified in min_transfer_time). Type 3 means transfers are not possible between the stops.",
 };
 
-const EXAMPLE_QUESTIONS = Object.keys(DEMO_QA).slice(0, 5);
+const EXAMPLES = [
+  "What is GTFS?",
+  "What does route_type 3 mean in GTFS?",
+  "How many routes does the Chicago Transit Authority operate?",
+  "What are the required files in a GTFS feed?",
+  "Can GTFS times exceed 24:00:00?",
+];
 
 type Mode = "demo" | "local";
 
@@ -36,55 +49,58 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<Mode>("demo");
-  const [apiUrl, setApiUrl] = useState("http://localhost:8000");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [apiUrl] = useState("http://localhost:8000");
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async (question: string) => {
+  const send = async (question: string) => {
     if (!question.trim() || loading) return;
 
-    const userMessage: Message = { role: "user", content: question.trim() };
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [...prev, { role: "user", content: question.trim() }]);
     setInput("");
     setLoading(true);
 
     try {
       let answer: string;
+      let time: number | undefined;
+      let tokens: number | undefined;
 
       if (mode === "demo") {
-        // Check for exact match or find closest
-        await new Promise((r) => setTimeout(r, 500)); // Simulate delay
+        await new Promise((r) => setTimeout(r, 500));
         const key = Object.keys(DEMO_QA).find(
           (k) => k.toLowerCase() === question.trim().toLowerCase()
         );
         answer = key
           ? DEMO_QA[key]
-          : "This is a demo mode with pre-computed answers. Try one of the example questions, or switch to 'Live Mode' to connect to the local API server for real-time responses.";
+          : "This question isn\u2019t in the demo set. Try one of the examples above, or switch to Live Mode for real-time answers.";
+        time = 0.5;
+        tokens = answer.split(" ").length;
       } else {
-        // Call local FastAPI backend
-        const response = await fetch(`${apiUrl}/api/chat`, {
+        const res = await fetch(`${apiUrl}/api/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: question.trim() }),
         });
-        if (!response.ok) throw new Error(`API error: ${response.status}`);
-        const data = await response.json();
+        if (!res.ok) throw new Error(`API ${res.status}`);
+        const data = await res.json();
         answer = data.answer;
+        time = data.time_seconds;
+        tokens = data.tokens;
       }
 
-      setMessages((prev) => [...prev, { role: "assistant", content: answer }]);
-    } catch (error: any) {
+      setMessages((prev) => [...prev, { role: "assistant", content: answer, time, tokens }]);
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content:
             mode === "local"
-              ? `Could not connect to ${apiUrl}. Make sure the backend is running:\n\n.venv/bin/uvicorn app.api.main:app --port 8000`
-              : `Error: ${error.message}`,
+              ? `Could not reach ${apiUrl}. Is the backend running?\n\nuvicorn app.api.main:app --port 8000`
+              : "Something went wrong.",
         },
       ]);
     } finally {
@@ -92,150 +108,206 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sendMessage(input);
-  };
-
   return (
-    <div className="flex flex-col h-screen max-w-3xl mx-auto">
-      {/* Header */}
-      <header className="bg-blue-600 text-white p-4 shadow-md">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold">UmarTransit-1B</h1>
-            <p className="text-blue-100 text-sm">
-              AI assistant for public transit & GTFS data
-            </p>
+    <div className="flex flex-col h-screen">
+      {/* ── Header ── */}
+      <header className="flex items-center justify-between border-b px-5 py-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
+            T
           </div>
+          <div>
+            <h1 className="text-sm font-semibold leading-none">UmarTransit-1B</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">Transit & GTFS assistant</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                mode === "demo" ? "bg-amber-500" : "bg-emerald-500"
+              }`}
+            />
             <select
               value={mode}
               onChange={(e) => {
                 setMode(e.target.value as Mode);
                 setMessages([]);
               }}
-              className="bg-blue-700 text-white text-xs rounded px-2 py-1 border border-blue-400"
+              className="bg-transparent text-xs text-muted-foreground cursor-pointer focus:outline-none"
             >
-              <option value="demo">Demo Mode</option>
-              <option value="local">Live Mode (local API)</option>
+              <option value="demo">Demo</option>
+              <option value="local">Live</option>
             </select>
           </div>
+
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMessages([])}
+              className="h-7 px-2 text-xs text-muted-foreground"
+            >
+              Clear
+            </Button>
+          )}
         </div>
-        {mode === "demo" && (
-          <p className="text-blue-200 text-xs mt-1">
-            Showing pre-computed answers. Switch to Live Mode to run the actual model.
-          </p>
-        )}
-        {mode === "local" && (
-          <p className="text-blue-200 text-xs mt-1">
-            Connected to {apiUrl}
-          </p>
-        )}
       </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
-          <div className="text-center py-8">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">
-              Ask me about transit systems & GTFS
-            </h2>
-            <p className="text-gray-500 text-sm mb-4">
-              {mode === "demo"
-                ? "Click an example question to see a pre-computed answer from UmarTransit-1B."
-                : "Make sure the backend is running locally, then ask any transit question."}
-            </p>
-            <div className="space-y-2">
-              {EXAMPLE_QUESTIONS.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => sendMessage(q)}
-                  className="block w-full text-left p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors text-sm text-gray-700"
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+      {/* ── Chat area ── */}
+      <ScrollArea className="flex-1">
+        <div className="mx-auto max-w-2xl px-5 py-6">
+          {/* Empty state */}
+          {messages.length === 0 && (
+            <div className="space-y-6 pt-4">
+              <div>
+                <h2 className="text-lg font-semibold">What do you want to know?</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {mode === "demo"
+                    ? "Pick a question below or type one of the examples."
+                    : "Ask anything about transit systems and GTFS data."}
+                </p>
+              </div>
 
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                msg.role === "user"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-800"
-              }`}
-            >
-              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-            </div>
-          </div>
-        ))}
+              <div className="grid gap-2">
+                {EXAMPLES.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => send(q)}
+                    className="text-left rounded-lg border px-3.5 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
 
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3">
-              <div className="flex space-x-1 items-center">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
-                <span className="text-xs text-gray-400 ml-2">
-                  {mode === "demo" ? "Loading..." : "Generating response..."}
-                </span>
+              <Separator />
+
+              <div className="flex flex-wrap gap-2">
+                {["15 agencies", "10 countries", "11K routes", "ROUGE-L 0.82"].map(
+                  (s) => (
+                    <Badge key={s} variant="secondary" className="font-normal">
+                      {s}
+                    </Badge>
+                  )
+                )}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div ref={messagesEndRef} />
-      </div>
+          {/* Messages */}
+          {messages.map((msg, i) => (
+            <div key={i} className="msg-enter mb-4">
+              <div
+                className={`flex gap-3 ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                {msg.role === "assistant" && (
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary text-[11px] font-bold text-primary-foreground">
+                    T
+                  </div>
+                )}
 
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-200">
-        <div className="flex space-x-2">
-          <input
-            type="text"
+                <Card
+                  className={`max-w-[80%] ${
+                    msg.role === "user"
+                      ? "bg-secondary border-transparent"
+                      : "bg-card"
+                  }`}
+                >
+                  <CardContent className="p-3">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {msg.content}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {msg.role === "user" && (
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-secondary text-[11px] font-bold text-secondary-foreground">
+                    U
+                  </div>
+                )}
+              </div>
+
+              {msg.role === "assistant" && msg.time != null && (
+                <p className="ml-9 mt-1 text-[11px] text-muted-foreground">
+                  {msg.time}s
+                  {msg.tokens != null && <span className="ml-2">{msg.tokens} tokens</span>}
+                </p>
+              )}
+            </div>
+          ))}
+
+          {/* Typing */}
+          {loading && (
+            <div className="msg-enter flex gap-3 mb-4">
+              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary text-[11px] font-bold text-primary-foreground">
+                T
+              </div>
+              <Card className="bg-card">
+                <CardContent className="p-3 flex items-center gap-1">
+                  {[0, 1, 2].map((d) => (
+                    <span
+                      key={d}
+                      className="h-1.5 w-1.5 rounded-full bg-muted-foreground animate-bounce"
+                      style={{ animationDelay: `${d * 150}ms` }}
+                    />
+                  ))}
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {mode === "demo" ? "Loading..." : "Generating..."}
+                  </span>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
+      </ScrollArea>
+
+      {/* ── Input ── */}
+      <div className="border-t px-5 py-3">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            send(input);
+          }}
+          className="mx-auto flex max-w-2xl gap-2"
+        >
+          <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about transit routes, GTFS, schedules..."
-            className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            placeholder="Ask about routes, stops, GTFS spec..."
             disabled={loading}
+            className="flex-1"
           />
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
+          <Button type="submit" disabled={loading || !input.trim()} size="sm">
             Send
-          </button>
-        </div>
-      </form>
+          </Button>
+        </form>
+      </div>
 
-      {/* Footer */}
-      <div className="bg-gray-100 px-4 py-2 text-center">
-        <p className="text-xs text-gray-500">
-          Powered by{" "}
-          <a
-            href="https://huggingface.co/umarfarookm/UmarTransit-1B"
-            target="_blank"
-            className="text-blue-500 hover:underline"
-          >
-            UmarTransit-1B
-          </a>
-          {" | "}
-          <a
-            href="https://github.com/umarfarookm/transit-foundation-model"
-            target="_blank"
-            className="text-blue-500 hover:underline"
-          >
-            GitHub
-          </a>
-        </p>
+      {/* ── Footer ── */}
+      <div className="px-5 py-1.5 text-center text-[11px] text-muted-foreground border-t">
+        <a
+          href="https://huggingface.co/umarfarookm/UmarTransit-1B"
+          target="_blank"
+          className="hover:text-foreground transition-colors"
+        >
+          HuggingFace
+        </a>
+        <span className="mx-1.5">·</span>
+        <a
+          href="https://github.com/umarfarookm/transit-foundation-model"
+          target="_blank"
+          className="hover:text-foreground transition-colors"
+        >
+          GitHub
+        </a>
+        <span className="mx-1.5">·</span>
+        <span>Apache 2.0</span>
       </div>
     </div>
   );
