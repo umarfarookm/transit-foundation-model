@@ -146,9 +146,9 @@ Mobility Database CSV → Filter → Select 15 diverse feeds → Download ZIPs �
 
 ### Commands
 ```bash
-python -m scripts.catalog_builder    # Download catalog (2,000+ feeds)
-python -m scripts.feed_selector      # Select 15 diverse feeds → seed_feeds.json
-python -m scripts.download_feeds     # Download all feeds (~858 MB)
+.venv/bin/python -m scripts.catalog_builder    # Download catalog (2,000+ feeds)
+.venv/bin/python -m scripts.feed_selector      # Select 15 diverse feeds → seed_feeds.json
+.venv/bin/python -m scripts.download_feeds     # Download all feeds (~858 MB)
 ```
 
 ### Output
@@ -218,7 +218,7 @@ Like database foreign key constraints:
 
 ### Commands
 ```bash
-python -m scripts.clean_all_feeds    # Clean all 15 feeds → Parquet
+.venv/bin/python -m scripts.clean_all_feeds    # Clean all 15 feeds → Parquet
 ```
 
 ### Output
@@ -292,8 +292,8 @@ Each record in `train.jsonl`:
 
 ### Commands
 ```bash
-python -m scripts.precompute_feed_stats     # Extract feed statistics
-python -m scripts.generate_synthetic_dataset --seed 42  # Generate Q&A pairs
+.venv/bin/python -m scripts.precompute_feed_stats     # Extract feed statistics
+.venv/bin/python -m scripts.generate_synthetic_dataset --seed 42  # Generate Q&A pairs
 ```
 
 ### Output
@@ -328,7 +328,7 @@ If we split randomly, rare categories like "comparative" (14 pairs) might end up
 
 ### Commands
 ```bash
-python -m scripts.validate_dataset --seed 42
+.venv/bin/python -m scripts.validate_dataset --seed 42
 ```
 
 ---
@@ -516,10 +516,10 @@ Run UmarTransit-1B on your own machine.
 Two modes:
 ```bash
 # Interactive chat
-python -m inference.run_local
+.venv/bin/python -m inference.run_local
 
 # Single question
-python -m inference.run_local -q "What is GTFS?"
+.venv/bin/python -m inference.run_local -q "What is GTFS?"
 ```
 
 ### How It Works

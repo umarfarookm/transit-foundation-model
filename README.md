@@ -120,24 +120,27 @@ cd transit-foundation-model
 python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -e .
+pip install torch transformers accelerate fastapi uvicorn "huggingface-hub<1.0"
 ```
 
 ### 2. Run the Data Pipeline
 ```bash
+source .venv/bin/activate
+
 # Download GTFS feeds (15 feeds, ~858 MB)
-python -m scripts.catalog_builder
-python -m scripts.feed_selector
-python -m scripts.download_feeds
+.venv/bin/python -m scripts.catalog_builder
+.venv/bin/python -m scripts.feed_selector
+.venv/bin/python -m scripts.download_feeds
 
 # Clean and normalize
-python -m scripts.clean_all_feeds
+.venv/bin/python -m scripts.clean_all_feeds
 
 # Generate synthetic training data
-python -m scripts.precompute_feed_stats
-python -m scripts.generate_synthetic_dataset
+.venv/bin/python -m scripts.precompute_feed_stats
+.venv/bin/python -m scripts.generate_synthetic_dataset
 
 # Validate and split
-python -m scripts.validate_dataset
+.venv/bin/python -m scripts.validate_dataset
 ```
 
 ### 3. Train the Model
@@ -146,12 +149,12 @@ Open `training/train_umartransit.ipynb` in Google Colab with a T4 GPU and run al
 ### 4. Run Locally
 ```bash
 # Terminal inference
-python -m inference.run_local
+.venv/bin/python -m inference.run_local
 
-# Web interface (backend)
-uvicorn app.api.main:app --port 8000
+# Web interface (backend — Terminal 1)
+.venv/bin/uvicorn app.api.main:app --port 8000
 
-# Web interface (frontend)
+# Web interface (frontend — Terminal 2)
 cd app/web && npm install && npm run dev
 # Open http://localhost:3000
 ```
