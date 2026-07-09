@@ -5,6 +5,7 @@
 [![Demo](https://img.shields.io/badge/Demo-Vercel-black.svg)](https://transit-foundation-model.vercel.app)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://python.org)
 [![ROUGE-L](https://img.shields.io/badge/ROUGE--L-0.82-brightgreen.svg)]()
+[![GGUF](https://img.shields.io/badge/GGUF-Available-orange.svg)](https://huggingface.co/umarfarookm/UmarTransit-1B)
 
 A domain-specific foundation model for **public transit systems** and **GTFS (General Transit Feed Specification)** data, built from scratch as an end-to-end AI/ML engineering project.
 
@@ -68,6 +69,16 @@ A: The Chicago Transit Authority (CTA) operates 133 routes.
 | Keyword Match | 0.4086 |
 | Best Category | Transfer (0.90) |
 | Test Pairs | 335 |
+
+## Model Formats
+
+| Format | File | Size | Use Case |
+|--------|------|------|----------|
+| Safetensors | `model.safetensors` | 3.09 GB | Full precision — Transformers/Python |
+| GGUF Q4_K_M | `UmarTransit-1B.Q4_K_M.gguf` | 986 MB | 4-bit quantized — Ollama/llama.cpp (recommended) |
+| GGUF Q8_0 | `UmarTransit-1B.Q8_0.gguf` | 1.65 GB | 8-bit quantized — Ollama/llama.cpp (higher quality) |
+
+All formats available at [huggingface.co/umarfarookm/UmarTransit-1B](https://huggingface.co/umarfarookm/UmarTransit-1B)
 
 ## Project Structure
 

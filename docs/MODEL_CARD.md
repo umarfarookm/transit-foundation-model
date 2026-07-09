@@ -54,6 +54,14 @@ Evaluated on 335 held-out test pairs across 8 task categories:
 **Best performing:** Transfer analysis (ROUGE-L: 0.90)
 **Needs improvement:** GTFS knowledge (ROUGE-L: 0.38) — limited training data (22 pairs)
 
+## Available Formats
+
+| Format | File | Size | Use Case |
+|--------|------|------|----------|
+| Safetensors | `model.safetensors` | 3.09 GB | Full precision — Transformers/Python |
+| GGUF Q4_K_M | `UmarTransit-1B.Q4_K_M.gguf` | 986 MB | 4-bit — Ollama/llama.cpp (recommended) |
+| GGUF Q8_0 | `UmarTransit-1B.Q8_0.gguf` | 1.65 GB | 8-bit — Ollama/llama.cpp (higher quality) |
+
 ## Training Data
 
 The model was trained on synthetic instruction-response pairs generated from **15 real public GTFS feeds** across **10 countries**:
