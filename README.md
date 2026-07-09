@@ -1,9 +1,16 @@
 # UmarTransit-1B
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Model on HF](https://img.shields.io/badge/Model-HuggingFace-yellow.svg)](https://huggingface.co/umarfarookm/UmarTransit-1B)
+[![Demo](https://img.shields.io/badge/Demo-Vercel-black.svg)](https://transit-foundation-model.vercel.app)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://python.org)
+[![ROUGE-L](https://img.shields.io/badge/ROUGE--L-0.82-brightgreen.svg)]()
+
 A domain-specific foundation model for **public transit systems** and **GTFS (General Transit Feed Specification)** data, built from scratch as an end-to-end AI/ML engineering project.
 
 **Live Demo:** [transit-foundation-model.vercel.app](https://transit-foundation-model.vercel.app)
 **Model:** [huggingface.co/umarfarookm/UmarTransit-1B](https://huggingface.co/umarfarookm/UmarTransit-1B)
+**Documentation:** [Step-by-step build guide](docs/GUIDE.md)
 
 ## What It Does
 
@@ -188,6 +195,18 @@ cd app/web && npm install && npm run dev
 | Model Hosting | HuggingFace Hub |
 | Web Hosting | Vercel |
 
+## Contributing
+
+Contributions are welcome! Some ideas:
+
+- **Add more GTFS feeds** — especially from Asia, Africa, South America
+- **Improve training data** — more GTFS knowledge pairs, better question variety
+- **Add new question categories** — fare information, accessibility, real-time data
+- **Optimize inference** — GGUF conversion, model quantization
+- **Improve the web app** — streaming responses, conversation history
+
+See [docs/GUIDE.md](docs/GUIDE.md) for how the project is structured.
+
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE).
@@ -195,3 +214,9 @@ Apache 2.0 — see [LICENSE](LICENSE).
 ## Documentation
 
 See [docs/GUIDE.md](docs/GUIDE.md) for the complete step-by-step build guide covering all 12 phases with detailed explanations.
+
+## Star History
+
+If you find this project useful or interesting, please give it a star! It helps others discover it.
+
+[![GitHub stars](https://img.shields.io/github/stars/umarfarookm/transit-foundation-model?style=social)](https://github.com/umarfarookm/transit-foundation-model)
