@@ -30,6 +30,10 @@ Thumbs.db
 # Instructions (internal prompts, not part of codebase)
 instructions/
 
+# Internal docs (local reference only)
+docs/ORACLE_DEPLOYMENT.md
+docs/DEVTO_BLOG_POST.md
+
 # Environment / secrets
 .env
 *.env

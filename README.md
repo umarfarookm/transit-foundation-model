@@ -6,6 +6,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://python.org)
 [![ROUGE-L](https://img.shields.io/badge/ROUGE--L-0.82-brightgreen.svg)]()
 [![GGUF](https://img.shields.io/badge/GGUF-Available-orange.svg)](https://huggingface.co/umarfarookm/UmarTransit-1B)
+[![Blog](https://img.shields.io/badge/Blog-Dev.to-0A0A0A.svg)](https://dev.to/umar_elit/how-i-built-a-domain-specific-llm-for-public-transit-from-data-collection-to-deployment-18ip)
 
 A domain-specific foundation model for **public transit systems** and **GTFS (General Transit Feed Specification)** data, built from scratch as an end-to-end AI/ML engineering project.
 
@@ -14,6 +15,7 @@ A domain-specific foundation model for **public transit systems** and **GTFS (Ge
 **Live Demo:** [transit-foundation-model.vercel.app](https://transit-foundation-model.vercel.app)
 **Model:** [huggingface.co/umarfarookm/UmarTransit-1B](https://huggingface.co/umarfarookm/UmarTransit-1B)
 **Documentation:** [Step-by-step build guide](docs/GUIDE.md)
+**Blog Post:** [How I Built a Domain-Specific LLM for Public Transit](https://dev.to/umar_elit/how-i-built-a-domain-specific-llm-for-public-transit-from-data-collection-to-deployment-18ip)
 
 ## What It Does
 
