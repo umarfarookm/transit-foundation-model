@@ -33,6 +33,7 @@ instructions/
 # Internal docs (local reference only)
 docs/ORACLE_DEPLOYMENT.md
 docs/DEVTO_BLOG_POST.md
+docs/MEDIUM_BLOG_POST.md
 
 # Environment / secrets
 .env

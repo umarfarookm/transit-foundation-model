@@ -7,6 +7,7 @@
 [![ROUGE-L](https://img.shields.io/badge/ROUGE--L-0.82-brightgreen.svg)]()
 [![GGUF](https://img.shields.io/badge/GGUF-Available-orange.svg)](https://huggingface.co/umarfarookm/UmarTransit-1B)
 [![Blog](https://img.shields.io/badge/Blog-Dev.to-0A0A0A.svg)](https://dev.to/umar_elit/how-i-built-a-domain-specific-llm-for-public-transit-from-data-collection-to-deployment-18ip)
+[![Medium](https://img.shields.io/badge/Blog-Medium-12100E.svg)](https://medium.com/@umarfarook89/why-i-built-a-transit-specific-ai-model-instead-of-using-chatgpt-45c3186401ab)
 
 A domain-specific foundation model for **public transit systems** and **GTFS (General Transit Feed Specification)** data, built from scratch as an end-to-end AI/ML engineering project.
 
