@@ -1,0 +1,1567 @@
+{
+  "metadata": {
+    "name": "UmarTransit Evaluation Benchmark",
+    "version": "1.0",
+    "description": "Structured evaluation benchmark for transit AI models covering GTFS knowledge, validation, route analysis, journey planning, schedule reasoning, and transit operations.",
+    "total_questions": 193,
+    "categories": {
+      "gtfs_terminology": 25,
+      "gtfs_validation": 18,
+      "journey_planning": 10,
+      "route_analysis": 75,
+      "schedule_reasoning": 38,
+      "transit_operations": 27
+    },
+    "difficulty_distribution": {
+      "easy": 78,
+      "hard": 13,
+      "medium": 102
+    }
+  },
+  "questions": [
+    {
+      "question": "What is GTFS and what does the acronym stand for?",
+      "expected_answer": "GTFS stands for General Transit Feed Specification. It is an open standard for sharing public transit schedule, route, and stop information using CSV files packaged in a ZIP archive.",
+      "scoring_criteria": "Must mention: General Transit Feed Specification, open standard, CSV/ZIP format",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0001"
+    },
+    {
+      "question": "What is the difference between GTFS Static and GTFS Realtime?",
+      "expected_answer": "GTFS Static contains scheduled/planned transit data (routes, stops, timetables) in CSV files. GTFS Realtime provides live data including vehicle positions, trip updates (delays), and service alerts using Protocol Buffers.",
+      "scoring_criteria": "Must distinguish: Static = scheduled data in CSV, Realtime = live data (positions, delays, alerts) in Protocol Buffers",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0002"
+    },
+    {
+      "question": "What are the required files in a GTFS Static feed?",
+      "expected_answer": "Required files: agency.txt, routes.txt, trips.txt, stops.txt, stop_times.txt, and at least one of calendar.txt or calendar_dates.txt.",
+      "scoring_criteria": "Must list all 5 core files (agency, routes, trips, stops, stop_times) and mention calendar/calendar_dates requirement",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0003"
+    },
+    {
+      "question": "What does route_type 0 represent in GTFS?",
+      "expected_answer": "Route_type 0 represents Tram, Streetcar, or Light rail service — any light rail or street-level transit system within a metropolitan area.",
+      "scoring_criteria": "Must mention tram/streetcar/light rail",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0004"
+    },
+    {
+      "question": "What does route_type 1 represent in GTFS?",
+      "expected_answer": "Route_type 1 represents Subway or Metro service — any underground rail system within a metropolitan area.",
+      "scoring_criteria": "Must mention subway or metro",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0005"
+    },
+    {
+      "question": "What does route_type 3 represent in GTFS?",
+      "expected_answer": "Route_type 3 represents Bus service. It is the most common route type in GTFS feeds.",
+      "scoring_criteria": "Must mention bus",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0006"
+    },
+    {
+      "question": "Explain the relationship between routes.txt, trips.txt, and stop_times.txt in GTFS.",
+      "expected_answer": "Routes contain multiple trips (linked by route_id). Each trip has multiple stop_times (linked by trip_id). A route is a group of trips shown as a single service. A trip is one journey at a specific time. Stop_times list arrival/departure at each stop along a trip.",
+      "scoring_criteria": "Must explain the hierarchy: routes → trips → stop_times, and the linking fields (route_id, trip_id)",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0007"
+    },
+    {
+      "question": "What is the purpose of shapes.txt in GTFS?",
+      "expected_answer": "shapes.txt defines the physical geographic path a vehicle follows along a route. It contains sequences of latitude/longitude points. Trips reference shapes via shape_id to draw route lines on maps.",
+      "scoring_criteria": "Must mention: geographic path, lat/lon points, map visualization",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0008"
+    },
+    {
+      "question": "What is the difference between calendar.txt and calendar_dates.txt?",
+      "expected_answer": "calendar.txt defines regular weekly service patterns (day-of-week flags with date ranges). calendar_dates.txt defines exceptions — adding service on specific dates (exception_type=1) or removing service (exception_type=2). calendar_dates overrides calendar for specific dates.",
+      "scoring_criteria": "Must explain: calendar = regular patterns, calendar_dates = exceptions, exception_type values",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0009"
+    },
+    {
+      "question": "What does the location_type field in stops.txt indicate?",
+      "expected_answer": "location_type indicates: 0 or blank = stop/platform, 1 = station (parent), 2 = entrance/exit, 3 = generic node, 4 = boarding area. Stations group related stops via parent_station.",
+      "scoring_criteria": "Must list at least types 0, 1, 2 and explain parent_station grouping",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0010"
+    },
+    {
+      "question": "Can departure times in GTFS stop_times.txt exceed 24:00:00? Why?",
+      "expected_answer": "Yes. Times greater than 24:00:00 represent trips extending past midnight relative to the service day. For example, 25:30:00 means 1:30 AM the next day. This avoids ambiguity about which calendar day a late-night trip belongs to.",
+      "scoring_criteria": "Must confirm yes, explain midnight-crossing convention, give example",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0011"
+    },
+    {
+      "question": "What are the four transfer types defined in GTFS transfers.txt?",
+      "expected_answer": "Type 0: recommended transfer point. Type 1: timed transfer (vehicle waits). Type 2: minimum time required (min_transfer_time). Type 3: no transfer possible between the stops.",
+      "scoring_criteria": "Must list all 4 types with descriptions",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0012"
+    },
+    {
+      "question": "What is frequencies.txt used for in GTFS?",
+      "expected_answer": "frequencies.txt defines headway-based service for routes that run at regular intervals rather than fixed schedules. It specifies start_time, end_time, and headway_secs. The exact_times field indicates exact (1) or approximate (0) timing.",
+      "scoring_criteria": "Must mention headway-based service, start/end times, headway_secs",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0013"
+    },
+    {
+      "question": "What does the direction_id field mean in GTFS trips.txt?",
+      "expected_answer": "direction_id distinguishes between two directions of travel on a route using values 0 and 1 (e.g., outbound vs inbound, northbound vs southbound). It is optional and agency-defined.",
+      "scoring_criteria": "Must mention: values 0/1, bidirectional, agency-defined meaning",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0014"
+    },
+    {
+      "question": "How is wheelchair accessibility represented in GTFS?",
+      "expected_answer": "In trips.txt, wheelchair_accessible indicates if the vehicle accommodates wheelchairs (0=no info, 1=yes, 2=no). In stops.txt, wheelchair_boarding indicates if boarding is possible (0=no info, 1=some accessible, 2=not possible).",
+      "scoring_criteria": "Must mention both trips.txt and stops.txt fields with their values",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0015"
+    },
+    {
+      "question": "What information does feed_info.txt contain?",
+      "expected_answer": "feed_info.txt provides metadata: feed_publisher_name, feed_publisher_url, feed_lang (language), feed_start_date, feed_end_date (validity period), and feed_version.",
+      "scoring_criteria": "Must mention publisher info, language, and validity dates",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0016"
+    },
+    {
+      "question": "What is zone_id in GTFS stops.txt used for?",
+      "expected_answer": "zone_id defines the fare zone for a stop. It works with fare_rules.txt to calculate zone-based fares where prices vary based on origin/destination zones.",
+      "scoring_criteria": "Must mention fare zones and zone-based pricing",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0017"
+    },
+    {
+      "question": "What is the stop_sequence field in stop_times.txt?",
+      "expected_answer": "stop_sequence defines the order in which stops are visited during a trip. It must increase along the trip but does not need to be consecutive. It determines the sequence of arrivals and departures.",
+      "scoring_criteria": "Must explain ordering of stops within a trip",
+      "difficulty": "easy",
+      "category": "gtfs_terminology",
+      "id": "BM-0018"
+    },
+    {
+      "question": "What is a block_id in GTFS trips.txt?",
+      "expected_answer": "block_id groups trips that a single vehicle operates sequentially. When consecutive trips share the same block_id, a passenger can stay on the vehicle for a seat transfer without getting off. It represents a vehicle's work assignment.",
+      "scoring_criteria": "Must explain: vehicle continuity, sequential trips by same vehicle",
+      "difficulty": "hard",
+      "category": "gtfs_terminology",
+      "id": "BM-0019"
+    },
+    {
+      "question": "What is the purpose of the parent_station field in stops.txt?",
+      "expected_answer": "parent_station links a child stop (platform, entrance, boarding area) to its parent station. A station (location_type=1) groups related stops. For example, a subway station may have multiple platforms, each as a separate stop record pointing to the same parent_station.",
+      "scoring_criteria": "Must explain hierarchical grouping of stops under a station",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0020"
+    },
+    {
+      "question": "What is fare_attributes.txt in GTFS?",
+      "expected_answer": "fare_attributes.txt defines fare classes with price, currency, payment method (on board or before), and transfer rules (number of transfers allowed, transfer duration). It works with fare_rules.txt to map fares to routes and zones.",
+      "scoring_criteria": "Must mention price, currency, transfer rules",
+      "difficulty": "medium",
+      "category": "gtfs_terminology",
+      "id": "BM-0021"
+    },
+    {
+      "question": "What is the timepoint field in stop_times.txt?",
+      "expected_answer": "The timepoint field indicates whether arrival/departure times are exact (1) or approximate (0/empty). Exact timepoints are stops where the vehicle strictly adheres to the schedule. Approximate times are interpolated between timepoints.",
+      "scoring_criteria": "Must distinguish exact vs approximate times",
+      "difficulty": "hard",
+      "category": "gtfs_terminology",
+      "id": "BM-0022"
+    },
+    {
+      "question": "What is pathways.txt in GTFS?",
+      "expected_answer": "pathways.txt describes physical pathways within stations connecting platforms, entrances, and other nodes. It includes pathway type (walkway, stairs, escalator, elevator), traversal time, and length. It enables indoor navigation and accessibility routing.",
+      "scoring_criteria": "Must mention: station pathways, pathway types, accessibility/navigation",
+      "difficulty": "hard",
+      "category": "gtfs_terminology",
+      "id": "BM-0023"
+    },
+    {
+      "question": "What does pickup_type and drop_off_type mean in stop_times.txt?",
+      "expected_answer": "pickup_type indicates how passengers board: 0=regular, 1=no pickup, 2=phone agency to arrange, 3=coordinate with driver. drop_off_type works the same for alighting. These handle flag stops and request-only service.",
+      "scoring_criteria": "Must list values 0-3 for at least one field",
+      "difficulty": "hard",
+      "category": "gtfs_terminology",
+      "id": "BM-0024"
+    },
+    {
+      "question": "What is continuous_pickup and continuous_drop_off in GTFS?",
+      "expected_answer": "These fields in routes.txt or stop_times.txt indicate whether riders can board or alight anywhere along a route segment, not just at stops. Values: 0=continuous service, 1=no continuous (default), 2=phone to arrange, 3=coordinate with driver. This models flex routes and flag-stop service.",
+      "scoring_criteria": "Must explain: boarding/alighting anywhere along route, flex service",
+      "difficulty": "hard",
+      "category": "gtfs_terminology",
+      "id": "BM-0025"
+    },
+    {
+      "question": "A GTFS feed contains routes.txt, trips.txt, stops.txt, and stop_times.txt but is missing agency.txt. Is this feed valid?",
+      "expected_answer": "No, the feed is invalid. agency.txt is a required file in GTFS. It must be present to provide transit agency information including agency_name, agency_url, and agency_timezone.",
+      "scoring_criteria": "Must state invalid and identify agency.txt as required",
+      "difficulty": "easy",
+      "category": "gtfs_validation",
+      "id": "BM-0026"
+    },
+    {
+      "question": "A GTFS feed has neither calendar.txt nor calendar_dates.txt. Is this valid?",
+      "expected_answer": "No, this is invalid. A GTFS feed must include at least one of calendar.txt or calendar_dates.txt to define when service operates. Without either file, there is no way to determine service days.",
+      "scoring_criteria": "Must state invalid and explain at least one is required",
+      "difficulty": "easy",
+      "category": "gtfs_validation",
+      "id": "BM-0027"
+    },
+    {
+      "question": "A trip in stop_times.txt has departure_time 08:00:00 at stop_sequence 1, but arrival_time 07:50:00 at stop_sequence 2. Is this valid?",
+      "expected_answer": "No, this is invalid. Times must be non-decreasing along a trip. An arrival at stop_sequence 2 cannot be earlier than the departure from stop_sequence 1. This would mean the vehicle arrived before it departed.",
+      "scoring_criteria": "Must identify the time ordering violation",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0028"
+    },
+    {
+      "question": "A GTFS feed has a route in routes.txt with route_type value 99. Is this valid according to the spec?",
+      "expected_answer": "It depends on the GTFS version. The base GTFS spec defines route_types 0-7 and 11-12. Route_type 99 is not standard. However, some extended route type schemes (like the Google Transit extensions) allow additional codes. Most validators would flag this as a warning or error.",
+      "scoring_criteria": "Must note that 99 is not in the standard range (0-7, 11-12) and mention extended types",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0029"
+    },
+    {
+      "question": "A trip references a service_id that does not appear in calendar.txt or calendar_dates.txt. What is the problem?",
+      "expected_answer": "This is a referential integrity error. Every service_id referenced in trips.txt must exist in either calendar.txt or calendar_dates.txt. Without a matching service_id, the trip has no defined operating days and cannot be scheduled.",
+      "scoring_criteria": "Must identify referential integrity issue and explain the consequence",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0030"
+    },
+    {
+      "question": "A stop in stops.txt has stop_lat=0.0 and stop_lon=0.0. Is this a valid GTFS entry?",
+      "expected_answer": "Technically the format is valid, but this is almost certainly an error. Coordinates (0,0) place the stop in the Gulf of Guinea off the coast of Africa (known as 'Null Island'). Validators flag this as a likely data quality issue since no transit stops exist at that location.",
+      "scoring_criteria": "Must identify as likely error, mention Null Island or coordinates being in the ocean",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0031"
+    },
+    {
+      "question": "A stop_times.txt entry has an empty arrival_time and departure_time. When is this acceptable in GTFS?",
+      "expected_answer": "Empty times are acceptable for intermediate stops (not the first or last stop of a trip). The GTFS spec allows interpolation of times between timepoints. However, the first and last stop_times in a trip must have explicit times.",
+      "scoring_criteria": "Must mention: allowed for intermediate stops, not for first/last, interpolation",
+      "difficulty": "hard",
+      "category": "gtfs_validation",
+      "id": "BM-0032"
+    },
+    {
+      "question": "What happens if two stops in stops.txt have the same stop_id?",
+      "expected_answer": "This is invalid. stop_id must be unique within stops.txt. Duplicate stop_ids would cause ambiguity in stop_times.txt and transfers.txt references. Validators will reject the feed or flag it as a critical error.",
+      "scoring_criteria": "Must state stop_id must be unique",
+      "difficulty": "easy",
+      "category": "gtfs_validation",
+      "id": "BM-0033"
+    },
+    {
+      "question": "A route has trips defined in trips.txt but none of those trips have entries in stop_times.txt. Is this valid?",
+      "expected_answer": "No, this is invalid. Every trip must have at least two stop_time entries to define a meaningful journey (an origin and a destination). A trip without stop_times cannot be used for routing or scheduling.",
+      "scoring_criteria": "Must state invalid and mention minimum of 2 stop_times needed",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0034"
+    },
+    {
+      "question": "Can a GTFS feed have shapes.txt but no shape_id references in trips.txt?",
+      "expected_answer": "Yes, this is technically valid since shapes.txt is optional. However, having shapes without referencing them in trips is wasteful — the shape data exists but is unused. Validators may flag this as a warning.",
+      "scoring_criteria": "Must state valid but pointless/wasteful",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0035"
+    },
+    {
+      "question": "A feed has calendar.txt with start_date=20250101 and end_date=20241231. What is wrong?",
+      "expected_answer": "The end_date (2024-12-31) is before the start_date (2025-01-01), making the date range invalid. No service days would be active. The end_date must be equal to or later than start_date.",
+      "scoring_criteria": "Must identify that end_date is before start_date",
+      "difficulty": "easy",
+      "category": "gtfs_validation",
+      "id": "BM-0036"
+    },
+    {
+      "question": "A trip has stop_sequence values 1, 2, 2, 3 in stop_times.txt. Is this valid?",
+      "expected_answer": "No, this is invalid. stop_sequence values must be non-negative integers that increase along the trip. Having two entries with stop_sequence=2 creates ambiguity in the stop ordering. Each stop_time in a trip must have a unique stop_sequence.",
+      "scoring_criteria": "Must identify duplicate stop_sequence as invalid",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0037"
+    },
+    {
+      "question": "What validation issue exists if a route in routes.txt has an empty route_short_name AND an empty route_long_name?",
+      "expected_answer": "This is a validation error. The GTFS spec requires that at least one of route_short_name or route_long_name must be provided. Both being empty means riders have no way to identify the route.",
+      "scoring_criteria": "Must state at least one name is required",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0038"
+    },
+    {
+      "question": "A GTFS feed has stops located in New York but the agency_timezone is set to 'Europe/London'. What kind of validation issue is this?",
+      "expected_answer": "This is a data quality issue — the timezone does not match the geographic location of the stops. While technically valid format-wise, the incorrect timezone would cause all schedule times to be wrong for riders. Validators flag this as a geographic consistency warning.",
+      "scoring_criteria": "Must identify timezone-geography mismatch",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0039"
+    },
+    {
+      "question": "What happens if transfers.txt specifies transfer_type=2 but min_transfer_time is missing?",
+      "expected_answer": "This is a validation issue. transfer_type=2 means a minimum transfer time is required, so the min_transfer_time field should be provided. Without it, the transfer time constraint cannot be enforced. Validators would flag this as an error or warning.",
+      "scoring_criteria": "Must explain that type 2 requires min_transfer_time",
+      "difficulty": "hard",
+      "category": "gtfs_validation",
+      "id": "BM-0040"
+    },
+    {
+      "question": "A GTFS feed has a trip where stop_times go from stop A (departure 10:00) to stop B (arrival 10:00) — same time, different stops. Is this valid?",
+      "expected_answer": "Yes, this is technically valid. GTFS allows equal arrival/departure times at consecutive stops, which can represent very short segments or time-rounding. However, it implies zero travel time between stops, which may be flagged as a warning by some validators.",
+      "scoring_criteria": "Must state valid but potentially flagged as warning",
+      "difficulty": "hard",
+      "category": "gtfs_validation",
+      "id": "BM-0041"
+    },
+    {
+      "question": "Can a stop in stops.txt exist without being referenced in any stop_times.txt entry?",
+      "expected_answer": "Yes, this is valid. stops.txt may contain parent stations (location_type=1), entrances (type 2), or generic nodes (type 3) that are not directly referenced in stop_times.txt. Even unused stop/platform records are technically valid but may indicate orphaned data.",
+      "scoring_criteria": "Must state valid and mention parent stations or non-platform location types",
+      "difficulty": "medium",
+      "category": "gtfs_validation",
+      "id": "BM-0042"
+    },
+    {
+      "question": "What is wrong with a GTFS feed where all trips have the same service_id but calendar.txt shows that service runs on no days (monday=0 through sunday=0)?",
+      "expected_answer": "If all day-of-week flags are 0 and there are no additions in calendar_dates.txt, then no trips would ever run. The feed is technically valid but operationally useless — it defines routes and trips that never operate.",
+      "scoring_criteria": "Must identify that no service days = no active trips",
+      "difficulty": "hard",
+      "category": "gtfs_validation",
+      "id": "BM-0043"
+    },
+    {
+      "question": "How many transit routes does Île-de-France Mobilités operate?",
+      "expected_answer": "Île-de-France Mobilités operates 1476 routes.",
+      "scoring_criteria": "Must state 1476 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0044"
+    },
+    {
+      "question": "What types of transit services does Île-de-France Mobilités offer?",
+      "expected_answer": "Île-de-France Mobilités offers: 17 Tram/Streetcar/Light rail, 16 Subway/Metro, 24 Rail/Commuter rail, 1417 Bus, 1 Aerial lift/Gondola, 1 Funicular.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0045"
+    },
+    {
+      "question": "Describe route T9 operated by Île-de-France Mobilités.",
+      "expected_answer": "Route T9 is a Tram/Streetcar/Light rail service by Île-de-France Mobilités with approximately 2,440 trips serving 38 stops.",
+      "scoring_criteria": "Must mention route type (Tram/Streetcar/Light rail), trip count (~2440), and stop count (~38)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0046"
+    },
+    {
+      "question": "Which route in the Île-de-France Mobilités network has the most scheduled trips?",
+      "expected_answer": "Route T4 has the most trips with approximately 3,821 scheduled trips.",
+      "scoring_criteria": "Must identify route T4 with ~3821 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0047"
+    },
+    {
+      "question": "Which route in the Île-de-France Mobilités network serves the most stops?",
+      "expected_answer": "Route 321 serves the most stops with 79 stops.",
+      "scoring_criteria": "Must identify route 321 with 79 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0048"
+    },
+    {
+      "question": "How many transit routes does Auckland Transport operate?",
+      "expected_answer": "Auckland Transport operates 226 routes.",
+      "scoring_criteria": "Must state 226 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0049"
+    },
+    {
+      "question": "What types of transit services does Auckland Transport offer?",
+      "expected_answer": "Auckland Transport offers: 5 Rail/Commuter rail, 206 Bus, 15 Ferry.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0050"
+    },
+    {
+      "question": "Describe route 101 operated by Auckland Transport.",
+      "expected_answer": "Route 101 is a Bus service by Auckland Transport with approximately 18 trips serving 51 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~18), and stop count (~51)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0051"
+    },
+    {
+      "question": "Which route in the Auckland Transport network has the most scheduled trips?",
+      "expected_answer": "Route WEST has the most trips with approximately 645 scheduled trips.",
+      "scoring_criteria": "Must identify route WEST with ~645 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0052"
+    },
+    {
+      "question": "Which route in the Auckland Transport network serves the most stops?",
+      "expected_answer": "Route 195 serves the most stops with 120 stops.",
+      "scoring_criteria": "Must identify route 195 with 120 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0053"
+    },
+    {
+      "question": "How many transit routes does OVapi Netherlands operate?",
+      "expected_answer": "OVapi Netherlands operates 3114 routes.",
+      "scoring_criteria": "Must state 3114 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0054"
+    },
+    {
+      "question": "What types of transit services does OVapi Netherlands offer?",
+      "expected_answer": "OVapi Netherlands offers: 48 Tram/Streetcar/Light rail, 11 Subway/Metro, 177 Rail/Commuter rail, 2853 Bus, 25 Ferry.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0055"
+    },
+    {
+      "question": "Describe route M5 operated by OVapi Netherlands.",
+      "expected_answer": "Route M5 is a Bus service by OVapi Netherlands with approximately 1,968 trips serving 20 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~1968), and stop count (~20)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0056"
+    },
+    {
+      "question": "Which route in the OVapi Netherlands network has the most scheduled trips?",
+      "expected_answer": "Route M1 has the most trips with approximately 3,303 scheduled trips.",
+      "scoring_criteria": "Must identify route M1 with ~3303 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0057"
+    },
+    {
+      "question": "Which route in the OVapi Netherlands network serves the most stops?",
+      "expected_answer": "Route 383 serves the most stops with 146 stops.",
+      "scoring_criteria": "Must identify route 383 with 146 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0058"
+    },
+    {
+      "question": "How many transit routes does Transperth operate?",
+      "expected_answer": "Transperth operates 433 routes.",
+      "scoring_criteria": "Must state 433 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0059"
+    },
+    {
+      "question": "What types of transit services does Transperth offer?",
+      "expected_answer": "Transperth offers: 13 Rail/Commuter rail, 419 Bus, 1 Ferry.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0060"
+    },
+    {
+      "question": "Describe route 245 operated by Transperth.",
+      "expected_answer": "Route 245 is a Bus service by Transperth with approximately 253 trips serving 63 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~253), and stop count (~63)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0061"
+    },
+    {
+      "question": "Which route in the Transperth network has the most scheduled trips?",
+      "expected_answer": "Route Red CAT has the most trips with approximately 1,692 scheduled trips.",
+      "scoring_criteria": "Must identify route Red CAT with ~1692 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0062"
+    },
+    {
+      "question": "Which route in the Transperth network serves the most stops?",
+      "expected_answer": "Route 220 serves the most stops with 180 stops.",
+      "scoring_criteria": "Must identify route 220 with 180 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0063"
+    },
+    {
+      "question": "How many transit routes does Rejseplanen operate?",
+      "expected_answer": "Rejseplanen operates 1610 routes.",
+      "scoring_criteria": "Must state 1610 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0064"
+    },
+    {
+      "question": "What types of transit services does Rejseplanen offer?",
+      "expected_answer": "Rejseplanen offers: 4 Tram/Streetcar/Light rail, 4 Subway/Metro, 7 Unknown (type 109), 31 Rail/Commuter rail, 1392 Bus, 13 Ferry, 8 Unknown (type 700), 151 Unknown (type 715).",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0065"
+    },
+    {
+      "question": "Describe route 498 operated by Rejseplanen.",
+      "expected_answer": "Route 498 is a Bus service by Rejseplanen with approximately 2 trips serving 19 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~2), and stop count (~19)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0066"
+    },
+    {
+      "question": "Which route in the Rejseplanen network has the most scheduled trips?",
+      "expected_answer": "Route 030 has the most trips with approximately 8,013 scheduled trips.",
+      "scoring_criteria": "Must identify route 030 with ~8013 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0067"
+    },
+    {
+      "question": "Which route in the Rejseplanen network serves the most stops?",
+      "expected_answer": "Route 10 serves the most stops with 116 stops.",
+      "scoring_criteria": "Must identify route 10 with 116 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0068"
+    },
+    {
+      "question": "How many transit routes does Valley Metro (VM) operate?",
+      "expected_answer": "Valley Metro (VM) operates 112 routes.",
+      "scoring_criteria": "Must state 112 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0069"
+    },
+    {
+      "question": "What types of transit services does Valley Metro (VM) offer?",
+      "expected_answer": "Valley Metro (VM) offers: 4 Tram/Streetcar/Light rail, 108 Bus.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0070"
+    },
+    {
+      "question": "Describe route 7s operated by Valley Metro (VM).",
+      "expected_answer": "Route 7s is a Bus service by Valley Metro (VM) with approximately 1 trips serving 13 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~1), and stop count (~13)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0071"
+    },
+    {
+      "question": "Which route in the Valley Metro (VM) network has the most scheduled trips?",
+      "expected_answer": "Route 29 has the most trips with approximately 682 scheduled trips.",
+      "scoring_criteria": "Must identify route 29 with ~682 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0072"
+    },
+    {
+      "question": "Which route in the Valley Metro (VM) network serves the most stops?",
+      "expected_answer": "Route 70 serves the most stops with 245 stops.",
+      "scoring_criteria": "Must identify route 70 with 245 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0073"
+    },
+    {
+      "question": "How many transit routes does Capital Metro operate?",
+      "expected_answer": "Capital Metro operates 70 routes.",
+      "scoring_criteria": "Must state 70 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0074"
+    },
+    {
+      "question": "What types of transit services does Capital Metro offer?",
+      "expected_answer": "Capital Metro offers: 1 Tram/Streetcar/Light rail, 69 Bus.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0075"
+    },
+    {
+      "question": "Describe route 105 operated by Capital Metro.",
+      "expected_answer": "Route 105 is a Bus service by Capital Metro with approximately 12 trips serving 70 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~12), and stop count (~70)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0076"
+    },
+    {
+      "question": "Which route in the Capital Metro network has the most scheduled trips?",
+      "expected_answer": "Route 20 has the most trips with approximately 1,103 scheduled trips.",
+      "scoring_criteria": "Must identify route 20 with ~1103 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0077"
+    },
+    {
+      "question": "Which route in the Capital Metro network serves the most stops?",
+      "expected_answer": "Route 3 serves the most stops with 189 stops.",
+      "scoring_criteria": "Must identify route 3 with 189 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0078"
+    },
+    {
+      "question": "How many transit routes does TriMet, Portland Streetcar operate?",
+      "expected_answer": "TriMet, Portland Streetcar operates 112 routes.",
+      "scoring_criteria": "Must state 112 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0079"
+    },
+    {
+      "question": "What types of transit services does TriMet, Portland Streetcar offer?",
+      "expected_answer": "TriMet, Portland Streetcar offers: 9 Tram/Streetcar/Light rail, 1 Rail/Commuter rail, 101 Bus, 1 Aerial lift/Gondola.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0080"
+    },
+    {
+      "question": "Describe route 17 operated by TriMet, Portland Streetcar.",
+      "expected_answer": "Route 17 is a Bus service by TriMet, Portland Streetcar with approximately 1,126 trips serving 169 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~1126), and stop count (~169)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0081"
+    },
+    {
+      "question": "Which route in the TriMet, Portland Streetcar network has the most scheduled trips?",
+      "expected_answer": "Route FX2 has the most trips with approximately 2,415 scheduled trips.",
+      "scoring_criteria": "Must identify route FX2 with ~2415 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0082"
+    },
+    {
+      "question": "Which route in the TriMet, Portland Streetcar network serves the most stops?",
+      "expected_answer": "Route 20 serves the most stops with 258 stops.",
+      "scoring_criteria": "Must identify route 20 with 258 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0083"
+    },
+    {
+      "question": "How many transit routes does Los Angeles County Metropolitan Transportation Authority (LA Metro) operate?",
+      "expected_answer": "Los Angeles County Metropolitan Transportation Authority (LA Metro) operates 114 routes.",
+      "scoring_criteria": "Must state 114 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0084"
+    },
+    {
+      "question": "What types of transit services does Los Angeles County Metropolitan Transportation Authority (LA Metro) offer?",
+      "expected_answer": "Los Angeles County Metropolitan Transportation Authority (LA Metro) offers: 114 Bus.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0085"
+    },
+    {
+      "question": "Describe route Dodger Stadium Express operated by Los Angeles County Metropolitan Transportation Authority (LA Metro).",
+      "expected_answer": "Route Dodger Stadium Express is a Bus service by Los Angeles County Metropolitan Transportation Authority (LA Metro) with approximately 342 trips serving 2 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~342), and stop count (~2)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0086"
+    },
+    {
+      "question": "Which route in the Los Angeles County Metropolitan Transportation Authority (LA Metro) network has the most scheduled trips?",
+      "expected_answer": "Route 18 has the most trips with approximately 756 scheduled trips.",
+      "scoring_criteria": "Must identify route 18 with ~756 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0087"
+    },
+    {
+      "question": "Which route in the Los Angeles County Metropolitan Transportation Authority (LA Metro) network serves the most stops?",
+      "expected_answer": "Route 92 serves the most stops with 244 stops.",
+      "scoring_criteria": "Must identify route 92 with 244 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0088"
+    },
+    {
+      "question": "How many transit routes does Chicago Transit Authority (CTA) operate?",
+      "expected_answer": "Chicago Transit Authority (CTA) operates 133 routes.",
+      "scoring_criteria": "Must state 133 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0089"
+    },
+    {
+      "question": "What types of transit services does Chicago Transit Authority (CTA) offer?",
+      "expected_answer": "Chicago Transit Authority (CTA) offers: 8 Subway/Metro, 125 Bus.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0090"
+    },
+    {
+      "question": "Describe route 20 operated by Chicago Transit Authority (CTA).",
+      "expected_answer": "Route 20 is a Bus service by Chicago Transit Authority (CTA) with approximately 1,698 trips serving 128 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~1698), and stop count (~128)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0091"
+    },
+    {
+      "question": "Which route in the Chicago Transit Authority (CTA) network has the most scheduled trips?",
+      "expected_answer": "Route 9 has the most trips with approximately 1,808 scheduled trips.",
+      "scoring_criteria": "Must identify route 9 with ~1808 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0092"
+    },
+    {
+      "question": "Which route in the Chicago Transit Authority (CTA) network serves the most stops?",
+      "expected_answer": "Route 53 serves the most stops with 256 stops.",
+      "scoring_criteria": "Must identify route 53 with 256 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0093"
+    },
+    {
+      "question": "How many transit routes does Massachusetts Bay Transportation Authority (MBTA) operate?",
+      "expected_answer": "Massachusetts Bay Transportation Authority (MBTA) operates 403 routes.",
+      "scoring_criteria": "Must state 403 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0094"
+    },
+    {
+      "question": "What types of transit services does Massachusetts Bay Transportation Authority (MBTA) offer?",
+      "expected_answer": "Massachusetts Bay Transportation Authority (MBTA) offers: 5 Tram/Streetcar/Light rail, 3 Subway/Metro, 14 Rail/Commuter rail, 372 Bus, 9 Ferry.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0095"
+    },
+    {
+      "question": "Describe route 7 operated by Massachusetts Bay Transportation Authority (MBTA).",
+      "expected_answer": "Route 7 is a Bus service by Massachusetts Bay Transportation Authority (MBTA) with approximately 1,079 trips serving 33 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~1079), and stop count (~33)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0096"
+    },
+    {
+      "question": "Which route in the Massachusetts Bay Transportation Authority (MBTA) network has the most scheduled trips?",
+      "expected_answer": "Route Blue Line has the most trips with approximately 2,461 scheduled trips.",
+      "scoring_criteria": "Must identify route Blue Line with ~2461 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0097"
+    },
+    {
+      "question": "Which route in the Massachusetts Bay Transportation Authority (MBTA) network serves the most stops?",
+      "expected_answer": "Route 15 serves the most stops with 142 stops.",
+      "scoring_criteria": "Must identify route 15 with 142 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0098"
+    },
+    {
+      "question": "How many transit routes does NMBS/SNCB Belgian Railways operate?",
+      "expected_answer": "NMBS/SNCB Belgian Railways operates 1376 routes.",
+      "scoring_criteria": "Must state 1376 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0099"
+    },
+    {
+      "question": "What types of transit services does NMBS/SNCB Belgian Railways offer?",
+      "expected_answer": "NMBS/SNCB Belgian Railways offers: 1145 Rail/Commuter rail, 231 Bus.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0100"
+    },
+    {
+      "question": "Describe route BUS operated by NMBS/SNCB Belgian Railways.",
+      "expected_answer": "Route BUS is a Bus service by NMBS/SNCB Belgian Railways with approximately 2 trips serving 5 stops.",
+      "scoring_criteria": "Must mention route type (Bus), trip count (~2), and stop count (~5)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0101"
+    },
+    {
+      "question": "Which route in the NMBS/SNCB Belgian Railways network has the most scheduled trips?",
+      "expected_answer": "Route IC has the most trips with approximately 515 scheduled trips.",
+      "scoring_criteria": "Must identify route IC with ~515 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0102"
+    },
+    {
+      "question": "Which route in the NMBS/SNCB Belgian Railways network serves the most stops?",
+      "expected_answer": "Route IC serves the most stops with 109 stops.",
+      "scoring_criteria": "Must identify route IC with 109 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0103"
+    },
+    {
+      "question": "How many transit routes does Toronto Transit Commission (TTC) operate?",
+      "expected_answer": "Toronto Transit Commission (TTC) operates 235 routes.",
+      "scoring_criteria": "Must state 235 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0104"
+    },
+    {
+      "question": "What types of transit services does Toronto Transit Commission (TTC) offer?",
+      "expected_answer": "Toronto Transit Commission (TTC) offers: 20 Tram/Streetcar/Light rail, 3 Subway/Metro, 212 Bus.",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0105"
+    },
+    {
+      "question": "Describe route 1 operated by Toronto Transit Commission (TTC).",
+      "expected_answer": "Route 1 is a Subway/Metro service by Toronto Transit Commission (TTC) with approximately 2,276 trips serving 76 stops.",
+      "scoring_criteria": "Must mention route type (Subway/Metro), trip count (~2276), and stop count (~76)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0106"
+    },
+    {
+      "question": "Which route in the Toronto Transit Commission (TTC) network has the most scheduled trips?",
+      "expected_answer": "Route 1 has the most trips with approximately 2,276 scheduled trips.",
+      "scoring_criteria": "Must identify route 1 with ~2276 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0107"
+    },
+    {
+      "question": "Which route in the Toronto Transit Commission (TTC) network serves the most stops?",
+      "expected_answer": "Route 102 serves the most stops with 169 stops.",
+      "scoring_criteria": "Must identify route 102 with 169 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0108"
+    },
+    {
+      "question": "How many transit routes does Verkehrsverbund Berlin-Brandenburg (VBB) operate?",
+      "expected_answer": "Verkehrsverbund Berlin-Brandenburg (VBB) operates 1298 routes.",
+      "scoring_criteria": "Must state 1298 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0109"
+    },
+    {
+      "question": "What types of transit services does Verkehrsverbund Berlin-Brandenburg (VBB) offer?",
+      "expected_answer": "Verkehrsverbund Berlin-Brandenburg (VBB) offers: 55 Unknown (type 100), 8 Unknown (type 1000), 15 Unknown (type 106), 50 Unknown (type 109), 76 Bus, 9 Unknown (type 400), 1041 Unknown (type 700), 44 Unknown (type 900).",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0110"
+    },
+    {
+      "question": "Describe route N4 operated by Verkehrsverbund Berlin-Brandenburg (VBB).",
+      "expected_answer": "Route N4 is a Unknown (type 700) service by Verkehrsverbund Berlin-Brandenburg (VBB) with approximately 20 trips serving 34 stops.",
+      "scoring_criteria": "Must mention route type (Unknown (type 700)), trip count (~20), and stop count (~34)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0111"
+    },
+    {
+      "question": "Which route in the Verkehrsverbund Berlin-Brandenburg (VBB) network has the most scheduled trips?",
+      "expected_answer": "Route 631 has the most trips with approximately 270 scheduled trips.",
+      "scoring_criteria": "Must identify route 631 with ~270 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0112"
+    },
+    {
+      "question": "Which route in the Verkehrsverbund Berlin-Brandenburg (VBB) network serves the most stops?",
+      "expected_answer": "Route E/525 serves the most stops with 97 stops.",
+      "scoring_criteria": "Must identify route E/525 with 97 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0113"
+    },
+    {
+      "question": "How many transit routes does HSL Helsinki Region Transport operate?",
+      "expected_answer": "HSL Helsinki Region Transport operates 466 routes.",
+      "scoring_criteria": "Must state 466 routes",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0114"
+    },
+    {
+      "question": "What types of transit services does HSL Helsinki Region Transport offer?",
+      "expected_answer": "HSL Helsinki Region Transport offers: 27 Tram/Streetcar/Light rail, 4 Subway/Metro, 14 Unknown (type 109), 3 Ferry, 357 Unknown (type 701), 14 Unknown (type 702), 46 Unknown (type 704), 1 Unknown (type 900).",
+      "scoring_criteria": "Must mention the transit modes and approximate counts",
+      "difficulty": "easy",
+      "category": "route_analysis",
+      "id": "BM-0115"
+    },
+    {
+      "question": "Describe route 3H operated by HSL Helsinki Region Transport.",
+      "expected_answer": "Route 3H is a Tram/Streetcar/Light rail service by HSL Helsinki Region Transport with approximately 97 trips serving 10 stops.",
+      "scoring_criteria": "Must mention route type (Tram/Streetcar/Light rail), trip count (~97), and stop count (~10)",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0116"
+    },
+    {
+      "question": "Which route in the HSL Helsinki Region Transport network has the most scheduled trips?",
+      "expected_answer": "Route 9 has the most trips with approximately 7,133 scheduled trips.",
+      "scoring_criteria": "Must identify route 9 with ~7133 trips",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0117"
+    },
+    {
+      "question": "Which route in the HSL Helsinki Region Transport network serves the most stops?",
+      "expected_answer": "Route H serves the most stops with 99 stops.",
+      "scoring_criteria": "Must identify route H with 99 stops",
+      "difficulty": "medium",
+      "category": "route_analysis",
+      "id": "BM-0118"
+    },
+    {
+      "question": "What factors should a journey planner consider when calculating the fastest route?",
+      "expected_answer": "A journey planner should consider: scheduled departure/arrival times, transfer times between routes, walking distances to/from stops, real-time delays, service frequency, number of transfers, and time of day (peak vs off-peak schedules).",
+      "scoring_criteria": "Must mention at least 4 of: times, transfers, walking, frequency, delays",
+      "difficulty": "medium",
+      "category": "journey_planning",
+      "id": "BM-0119"
+    },
+    {
+      "question": "A passenger needs to travel from stop A to stop C, but there is no direct route. Route 1 goes from A to B, and Route 2 goes from B to C. The transfer at B requires a minimum of 5 minutes. Route 1 arrives at B at 10:15 and Route 2 departs B at 10:18. Can the passenger make this connection?",
+      "expected_answer": "No, the passenger cannot make this connection. The available transfer time is only 3 minutes (10:18 - 10:15), but the minimum transfer time is 5 minutes. The passenger would need to wait for a later Route 2 departure.",
+      "scoring_criteria": "Must calculate 3 minutes available vs 5 required, conclude not possible",
+      "difficulty": "medium",
+      "category": "journey_planning",
+      "id": "BM-0120"
+    },
+    {
+      "question": "What is a timed transfer in public transit and how does GTFS represent it?",
+      "expected_answer": "A timed transfer is when a departing vehicle waits for an arriving vehicle at a transfer point, ensuring passengers can make the connection. In GTFS, this is represented in transfers.txt with transfer_type=1, which means the departing trip is expected to wait for the arriving trip.",
+      "scoring_criteria": "Must explain vehicle-waiting concept and mention transfer_type=1",
+      "difficulty": "medium",
+      "category": "journey_planning",
+      "id": "BM-0121"
+    },
+    {
+      "question": "Why might a journey planner suggest a route with more transfers but less total travel time over a direct route?",
+      "expected_answer": "A route with transfers might be faster if the connecting services are more frequent, operate on express/rapid routes with fewer stops, or avoid congested areas. The total journey time includes waiting, riding, and transferring — a well-timed multi-transfer route can beat a slow direct route.",
+      "scoring_criteria": "Must explain that total time matters more than transfer count",
+      "difficulty": "medium",
+      "category": "journey_planning",
+      "id": "BM-0122"
+    },
+    {
+      "question": "How does a transit planner handle trips that cross midnight in GTFS?",
+      "expected_answer": "GTFS uses times greater than 24:00:00 for trips crossing midnight. For example, a trip departing at 23:45 and arriving at 00:15 would have times 23:45:00 and 24:15:00. This keeps all times on the same service day, avoiding date boundary confusion. The journey planner must convert these for display (24:15 → 12:15 AM next day).",
+      "scoring_criteria": "Must explain times > 24:00:00 convention and service day concept",
+      "difficulty": "hard",
+      "category": "journey_planning",
+      "id": "BM-0123"
+    },
+    {
+      "question": "What is a fare zone and how does it affect journey planning?",
+      "expected_answer": "A fare zone is a geographic area used for pricing. Fares may increase when crossing zone boundaries. Journey planners need zone information to calculate accurate fares, show users the cost of different route options, and help passengers choose the most economical path.",
+      "scoring_criteria": "Must explain zone-based pricing and impact on route cost",
+      "difficulty": "easy",
+      "category": "journey_planning",
+      "id": "BM-0124"
+    },
+    {
+      "question": "A bus route runs every 10 minutes from 6:00 AM to 10:00 PM. How would this be represented in GTFS?",
+      "expected_answer": "This can be represented using frequencies.txt with: trip_id referencing a template trip, start_time=06:00:00, end_time=22:00:00, headway_secs=600 (10 minutes × 60 seconds). Alternatively, each individual trip could be listed in stop_times.txt, but frequencies.txt is more efficient for regular-interval service.",
+      "scoring_criteria": "Must mention frequencies.txt and headway_secs=600",
+      "difficulty": "medium",
+      "category": "journey_planning",
+      "id": "BM-0125"
+    },
+    {
+      "question": "What accessibility information should a journey planner use from GTFS?",
+      "expected_answer": "A journey planner should use: wheelchair_accessible from trips.txt (vehicle accessibility), wheelchair_boarding from stops.txt (stop accessibility), and pathways.txt (station navigation for mobility-impaired riders). This ensures routes suggested to wheelchair users only include accessible vehicles, stops, and transfer paths.",
+      "scoring_criteria": "Must mention wheelchair fields in both trips.txt and stops.txt",
+      "difficulty": "medium",
+      "category": "journey_planning",
+      "id": "BM-0126"
+    },
+    {
+      "question": "How does a journey planner determine if a transit service is running on a specific date?",
+      "expected_answer": "It checks: 1) calendar.txt for the regular schedule — is the service_id active on that day of week and within the date range? 2) calendar_dates.txt for exceptions — is service added (exception_type=1) or removed (exception_type=2) on that date? Exceptions override the regular schedule.",
+      "scoring_criteria": "Must explain checking both calendar.txt and calendar_dates.txt, with exceptions overriding",
+      "difficulty": "medium",
+      "category": "journey_planning",
+      "id": "BM-0127"
+    },
+    {
+      "question": "What is the difference between a guaranteed connection and a regular transfer?",
+      "expected_answer": "A guaranteed (timed) connection means the departing vehicle will wait for the arriving vehicle, ensuring the transfer. A regular transfer has no such guarantee — if the arriving service is late, the passenger may miss the connection. In GTFS, transfer_type=1 represents guaranteed connections, while type=0 is recommended but not guaranteed.",
+      "scoring_criteria": "Must distinguish guaranteed vs regular, mention transfer_type values",
+      "difficulty": "medium",
+      "category": "journey_planning",
+      "id": "BM-0128"
+    },
+    {
+      "question": "What are the operating hours for route T9 by Île-de-France Mobilités?",
+      "expected_answer": "Route T9 by Île-de-France Mobilités starts service at 4:46 AM and ends at 2:00 AM (next day).",
+      "scoring_criteria": "Must mention first departure ~04:46:00 and last departure ~26:00:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0129"
+    },
+    {
+      "question": "Route T9 by Île-de-France Mobilités runs 2,440 trips over approximately 21 hours. Estimate the average frequency.",
+      "expected_answer": "With 2,440 trips over ~21 hours (1274 minutes), the average headway is approximately 0.5 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 1 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0130"
+    },
+    {
+      "question": "How many service patterns does Île-de-France Mobilités define for weekdays vs weekends?",
+      "expected_answer": "Île-de-France Mobilités defines 1063 weekday service patterns and 692 weekend service patterns. The schedule covers the date range 20260704 to 20260805.",
+      "scoring_criteria": "Must mention 1063 weekday and 692 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0131"
+    },
+    {
+      "question": "What are the operating hours for route 112 by Auckland Transport?",
+      "expected_answer": "Route 112 by Auckland Transport starts service at 5:30 AM and ends at 11:00 PM.",
+      "scoring_criteria": "Must mention first departure ~05:30:00 and last departure ~23:00:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0132"
+    },
+    {
+      "question": "Route 112 by Auckland Transport runs 148 trips over approximately 17 hours. Estimate the average frequency.",
+      "expected_answer": "With 148 trips over ~17 hours (1050 minutes), the average headway is approximately 7.1 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 7 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0133"
+    },
+    {
+      "question": "How many service patterns does Auckland Transport define for weekdays vs weekends?",
+      "expected_answer": "Auckland Transport defines 31 weekday service patterns and 25 weekend service patterns. The schedule covers the date range 20260625 to 20260920.",
+      "scoring_criteria": "Must mention 31 weekday and 25 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0134"
+    },
+    {
+      "question": "What are the operating hours for route M6 by OVapi Netherlands?",
+      "expected_answer": "Route M6 by OVapi Netherlands starts service at 4:38 AM and ends at 3:02 AM (next day).",
+      "scoring_criteria": "Must mention first departure ~04:38:00 and last departure ~27:02:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0135"
+    },
+    {
+      "question": "Route M6 by OVapi Netherlands runs 1,895 trips over approximately 22 hours. Estimate the average frequency.",
+      "expected_answer": "With 1,895 trips over ~22 hours (1344 minutes), the average headway is approximately 0.7 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 1 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0136"
+    },
+    {
+      "question": "What are the operating hours for route 212 by Transperth?",
+      "expected_answer": "Route 212 by Transperth starts service at 9:00 AM and ends at 1:58 PM.",
+      "scoring_criteria": "Must mention first departure ~09:00:00 and last departure ~13:58:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0137"
+    },
+    {
+      "question": "Route 212 by Transperth runs 6 trips over approximately 4 hours. Estimate the average frequency.",
+      "expected_answer": "With 6 trips over ~4 hours (298 minutes), the average headway is approximately 49.7 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 50 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0138"
+    },
+    {
+      "question": "How many service patterns does Transperth define for weekdays vs weekends?",
+      "expected_answer": "Transperth defines 1493 weekday service patterns and 1458 weekend service patterns. The schedule covers the date range 20260630 to 20260928.",
+      "scoring_criteria": "Must mention 1493 weekday and 1458 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0139"
+    },
+    {
+      "question": "What are the operating hours for route 372 by Rejseplanen?",
+      "expected_answer": "Route 372 by Rejseplanen starts service at 1:10 PM and ends at 6:59 AM.",
+      "scoring_criteria": "Must mention first departure ~13:10:00 and last departure ~6:59:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0140"
+    },
+    {
+      "question": "How many service patterns does Rejseplanen define for weekdays vs weekends?",
+      "expected_answer": "Rejseplanen defines 501 weekday service patterns and 444 weekend service patterns. The schedule covers the date range 20260629 to 20260923.",
+      "scoring_criteria": "Must mention 501 weekday and 444 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0141"
+    },
+    {
+      "question": "What are the operating hours for route 7 by Valley Metro (VM)?",
+      "expected_answer": "Route 7 by Valley Metro (VM) starts service at 3:34 AM and ends at 11:27 PM.",
+      "scoring_criteria": "Must mention first departure ~03:34:00 and last departure ~23:27:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0142"
+    },
+    {
+      "question": "Route 7 by Valley Metro (VM) runs 580 trips over approximately 19 hours. Estimate the average frequency.",
+      "expected_answer": "With 580 trips over ~19 hours (1193 minutes), the average headway is approximately 2.1 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 2 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0143"
+    },
+    {
+      "question": "What are the operating hours for route 171 by Capital Metro?",
+      "expected_answer": "Route 171 by Capital Metro starts service at 6:00 AM and ends at 5:24 PM.",
+      "scoring_criteria": "Must mention first departure ~06:00:00 and last departure ~17:24:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0144"
+    },
+    {
+      "question": "Route 171 by Capital Metro runs 18 trips over approximately 11 hours. Estimate the average frequency.",
+      "expected_answer": "With 18 trips over ~11 hours (684 minutes), the average headway is approximately 38.0 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 38 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0145"
+    },
+    {
+      "question": "What are the operating hours for route 8 by TriMet, Portland Streetcar?",
+      "expected_answer": "Route 8 by TriMet, Portland Streetcar starts service at 4:45 AM and ends at 1:29 AM (next day).",
+      "scoring_criteria": "Must mention first departure ~04:45:00 and last departure ~25:29:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0146"
+    },
+    {
+      "question": "Route 8 by TriMet, Portland Streetcar runs 579 trips over approximately 20 hours. Estimate the average frequency.",
+      "expected_answer": "With 579 trips over ~20 hours (1244 minutes), the average headway is approximately 2.1 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 2 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0147"
+    },
+    {
+      "question": "How many service patterns does TriMet, Portland Streetcar define for weekdays vs weekends?",
+      "expected_answer": "TriMet, Portland Streetcar defines 24 weekday service patterns and 21 weekend service patterns. The schedule covers the date range 20260531 to 20261128.",
+      "scoring_criteria": "Must mention 24 weekday and 21 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0148"
+    },
+    {
+      "question": "What are the operating hours for route 10/48 by Los Angeles County Metropolitan Transportation Authority (LA Metro)?",
+      "expected_answer": "Route 10/48 by Los Angeles County Metropolitan Transportation Authority (LA Metro) starts service at 4:00 AM and ends at 12:27 AM (next day).",
+      "scoring_criteria": "Must mention first departure ~04:00:00 and last departure ~24:27:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0149"
+    },
+    {
+      "question": "Route 10/48 by Los Angeles County Metropolitan Transportation Authority (LA Metro) runs 304 trips over approximately 20 hours. Estimate the average frequency.",
+      "expected_answer": "With 304 trips over ~20 hours (1227 minutes), the average headway is approximately 4.0 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 4 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0150"
+    },
+    {
+      "question": "How many service patterns does Los Angeles County Metropolitan Transportation Authority (LA Metro) define for weekdays vs weekends?",
+      "expected_answer": "Los Angeles County Metropolitan Transportation Authority (LA Metro) defines 105 weekday service patterns and 24 weekend service patterns. The schedule covers the date range 20260607 to 20261212.",
+      "scoring_criteria": "Must mention 105 weekday and 24 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0151"
+    },
+    {
+      "question": "What are the operating hours for route 7 by Chicago Transit Authority (CTA)?",
+      "expected_answer": "Route 7 by Chicago Transit Authority (CTA) starts service at 5:24 AM and ends at 10:31 PM.",
+      "scoring_criteria": "Must mention first departure ~05:24:30 and last departure ~22:31:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0152"
+    },
+    {
+      "question": "Route 7 by Chicago Transit Authority (CTA) runs 273 trips over approximately 17 hours. Estimate the average frequency.",
+      "expected_answer": "With 273 trips over ~17 hours (1027 minutes), the average headway is approximately 3.8 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 4 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0153"
+    },
+    {
+      "question": "How many service patterns does Chicago Transit Authority (CTA) define for weekdays vs weekends?",
+      "expected_answer": "Chicago Transit Authority (CTA) defines 115 weekday service patterns and 39 weekend service patterns. The schedule covers the date range 20260528 to 20260731.",
+      "scoring_criteria": "Must mention 115 weekday and 39 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0154"
+    },
+    {
+      "question": "What are the operating hours for route SLW by Massachusetts Bay Transportation Authority (MBTA)?",
+      "expected_answer": "Route SLW by Massachusetts Bay Transportation Authority (MBTA) starts service at 4:14 AM and ends at 1:56 AM (next day).",
+      "scoring_criteria": "Must mention first departure ~04:14:00 and last departure ~25:56:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0155"
+    },
+    {
+      "question": "Route SLW by Massachusetts Bay Transportation Authority (MBTA) runs 510 trips over approximately 21 hours. Estimate the average frequency.",
+      "expected_answer": "With 510 trips over ~21 hours (1302 minutes), the average headway is approximately 2.6 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 3 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0156"
+    },
+    {
+      "question": "How many service patterns does Massachusetts Bay Transportation Authority (MBTA) define for weekdays vs weekends?",
+      "expected_answer": "Massachusetts Bay Transportation Authority (MBTA) defines 100 weekday service patterns and 55 weekend service patterns. The schedule covers the date range 20260624 to 20260905.",
+      "scoring_criteria": "Must mention 100 weekday and 55 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0157"
+    },
+    {
+      "question": "What are the operating hours for route P by NMBS/SNCB Belgian Railways?",
+      "expected_answer": "Route P by NMBS/SNCB Belgian Railways starts service at 7:19 AM and ends at 5:12 PM.",
+      "scoring_criteria": "Must mention first departure ~07:19:00 and last departure ~17:12:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0158"
+    },
+    {
+      "question": "Route P by NMBS/SNCB Belgian Railways runs 16 trips over approximately 9 hours. Estimate the average frequency.",
+      "expected_answer": "With 16 trips over ~9 hours (593 minutes), the average headway is approximately 37.1 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 37 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0159"
+    },
+    {
+      "question": "What are the operating hours for route 1 by Toronto Transit Commission (TTC)?",
+      "expected_answer": "Route 1 by Toronto Transit Commission (TTC) starts service at 10:02 AM and ends at 9:59 AM.",
+      "scoring_criteria": "Must mention first departure ~10:02:04 and last departure ~9:59:49",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0160"
+    },
+    {
+      "question": "How many service patterns does Toronto Transit Commission (TTC) define for weekdays vs weekends?",
+      "expected_answer": "Toronto Transit Commission (TTC) defines 1 weekday service patterns and 2 weekend service patterns. The schedule covers the date range 20260621 to 20260725.",
+      "scoring_criteria": "Must mention 1 weekday and 2 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0161"
+    },
+    {
+      "question": "What are the operating hours for route N4 by Verkehrsverbund Berlin-Brandenburg (VBB)?",
+      "expected_answer": "Route N4 by Verkehrsverbund Berlin-Brandenburg (VBB) starts service at 9:00 PM and ends at 8:15 AM.",
+      "scoring_criteria": "Must mention first departure ~21:00:00 and last departure ~8:15:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0162"
+    },
+    {
+      "question": "How many service patterns does Verkehrsverbund Berlin-Brandenburg (VBB) define for weekdays vs weekends?",
+      "expected_answer": "Verkehrsverbund Berlin-Brandenburg (VBB) defines 979 weekday service patterns and 888 weekend service patterns. The schedule covers the date range 20260623 to 20261212.",
+      "scoring_criteria": "Must mention 979 weekday and 888 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0163"
+    },
+    {
+      "question": "What are the operating hours for route 3H by HSL Helsinki Region Transport?",
+      "expected_answer": "Route 3H by HSL Helsinki Region Transport starts service at 6:41 PM and ends at 1:55 AM (next day).",
+      "scoring_criteria": "Must mention first departure ~18:41:00 and last departure ~25:55:00",
+      "difficulty": "easy",
+      "category": "schedule_reasoning",
+      "id": "BM-0164"
+    },
+    {
+      "question": "Route 3H by HSL Helsinki Region Transport runs 97 trips over approximately 7 hours. Estimate the average frequency.",
+      "expected_answer": "With 97 trips over ~7 hours (434 minutes), the average headway is approximately 4.5 minutes between trips.",
+      "scoring_criteria": "Must calculate approximately 4 minutes between trips",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0165"
+    },
+    {
+      "question": "How many service patterns does HSL Helsinki Region Transport define for weekdays vs weekends?",
+      "expected_answer": "HSL Helsinki Region Transport defines 6263 weekday service patterns and 1815 weekend service patterns. The schedule covers the date range 20260706 to 20260903.",
+      "scoring_criteria": "Must mention 6263 weekday and 1815 weekend patterns",
+      "difficulty": "medium",
+      "category": "schedule_reasoning",
+      "id": "BM-0166"
+    },
+    {
+      "question": "What is headway in public transit?",
+      "expected_answer": "Headway is the time interval between consecutive vehicles on the same route passing the same point. For example, a 10-minute headway means a bus comes every 10 minutes. Shorter headways mean more frequent service. Headway is the inverse of frequency.",
+      "scoring_criteria": "Must define as time between vehicles on same route",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0167"
+    },
+    {
+      "question": "What is deadheading in transit operations?",
+      "expected_answer": "Deadheading is when a transit vehicle operates without carrying passengers, typically traveling between the depot and the start of a route, or repositioning between routes. It represents non-revenue service time and distance that operators try to minimize.",
+      "scoring_criteria": "Must mention: vehicle moving without passengers, non-revenue service",
+      "difficulty": "medium",
+      "category": "transit_operations",
+      "id": "BM-0168"
+    },
+    {
+      "question": "What is a transit hub and why is it important?",
+      "expected_answer": "A transit hub is a major station or stop where multiple transit routes converge, enabling passengers to transfer between services. Hubs are important because they increase network connectivity, reduce the need for direct routes between all points, and allow hub-and-spoke network designs that serve more destinations efficiently.",
+      "scoring_criteria": "Must mention multiple routes converging and transfer connectivity",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0169"
+    },
+    {
+      "question": "What is the difference between local and express bus service?",
+      "expected_answer": "Local service stops at every stop along the route, providing maximum coverage but slower travel. Express service skips intermediate stops, making fewer stops for faster end-to-end travel. Express routes often run on highways or major corridors during peak hours.",
+      "scoring_criteria": "Must contrast: local stops at every stop, express skips stops for speed",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0170"
+    },
+    {
+      "question": "What is intermodal transit and give an example?",
+      "expected_answer": "Intermodal transit involves using multiple modes of transportation in a single journey. For example, a commuter might take a bus to a train station, ride the train downtown, then walk to their destination. GTFS supports this by including multiple route_types and transfer information in a single feed.",
+      "scoring_criteria": "Must define multiple modes in one journey and give an example",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0171"
+    },
+    {
+      "question": "What is a layover in transit operations?",
+      "expected_answer": "A layover is scheduled time at the end of a route where a vehicle waits before starting the return trip. It serves multiple purposes: allows the driver to rest, provides schedule recovery time if the previous trip ran late, and ensures the vehicle departs on time for the next trip.",
+      "scoring_criteria": "Must mention scheduled wait time at route end, schedule recovery",
+      "difficulty": "medium",
+      "category": "transit_operations",
+      "id": "BM-0172"
+    },
+    {
+      "question": "What is demand-responsive transit (DRT)?",
+      "expected_answer": "Demand-responsive transit is a flexible service where routes and schedules are adjusted based on passenger requests rather than following fixed routes. Examples include dial-a-ride, paratransit, and microtransit. In GTFS, this can be partially represented using continuous_pickup/drop_off or through GTFS-Flex extensions.",
+      "scoring_criteria": "Must explain flexible routing based on demand, mention examples",
+      "difficulty": "medium",
+      "category": "transit_operations",
+      "id": "BM-0173"
+    },
+    {
+      "question": "What is the purpose of a transit signal priority (TSP) system?",
+      "expected_answer": "Transit signal priority gives buses or trams preferential treatment at traffic signals — extending green lights or shortening red lights to reduce delays. TSP improves schedule adherence, reduces travel time, and makes transit more reliable and attractive to riders.",
+      "scoring_criteria": "Must explain preferential signal treatment for transit vehicles",
+      "difficulty": "medium",
+      "category": "transit_operations",
+      "id": "BM-0174"
+    },
+    {
+      "question": "What is a short turn in transit operations?",
+      "expected_answer": "A short turn is when a transit vehicle reverses direction before completing its full route, serving only part of the line. It is used to increase frequency on the busiest segment of a route or to recover from delays by reducing the round-trip time.",
+      "scoring_criteria": "Must explain turning back before full route, increased frequency on busy segments",
+      "difficulty": "hard",
+      "category": "transit_operations",
+      "id": "BM-0175"
+    },
+    {
+      "question": "What is fare capping and how does it benefit riders?",
+      "expected_answer": "Fare capping limits the total amount a rider pays over a period (daily, weekly, monthly). Once the cap is reached, additional trips are free. It benefits riders by providing the equivalent of a pass without requiring an upfront purchase, making transit more equitable for low-income riders who can't afford monthly passes.",
+      "scoring_criteria": "Must explain spending limit concept and equity benefit",
+      "difficulty": "medium",
+      "category": "transit_operations",
+      "id": "BM-0176"
+    },
+    {
+      "question": "What is a transit network's coverage vs frequency tradeoff?",
+      "expected_answer": "With limited resources, transit agencies must choose between coverage (serving more areas with less frequent service) and frequency (serving fewer routes but with shorter headways). High-frequency networks attract more riders per route but leave some areas unserved. Coverage-oriented networks reach more places but with longer waits.",
+      "scoring_criteria": "Must explain the resource tradeoff between area coverage and service frequency",
+      "difficulty": "hard",
+      "category": "transit_operations",
+      "id": "BM-0177"
+    },
+    {
+      "question": "What is a pulse schedule in transit?",
+      "expected_answer": "A pulse schedule (or timed-transfer network) is where multiple routes are scheduled to arrive at a central hub simultaneously, allow passenger transfers, then depart together. This creates a 'pulse' of activity at regular intervals and enables reliable connections even with low-frequency routes.",
+      "scoring_criteria": "Must explain simultaneous arrival at hub for transfers",
+      "difficulty": "hard",
+      "category": "transit_operations",
+      "id": "BM-0178"
+    },
+    {
+      "question": "How large is the Île-de-France Mobilités transit network in terms of stops and routes?",
+      "expected_answer": "The Île-de-France Mobilités network has 49,001 stops and 1476 routes.",
+      "scoring_criteria": "Must state approximately 49,001 stops and 1476 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0179"
+    },
+    {
+      "question": "How large is the Auckland Transport transit network in terms of stops and routes?",
+      "expected_answer": "The Auckland Transport network has 7,003 stops and 226 routes.",
+      "scoring_criteria": "Must state approximately 7,003 stops and 226 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0180"
+    },
+    {
+      "question": "How large is the OVapi Netherlands transit network in terms of stops and routes?",
+      "expected_answer": "The OVapi Netherlands network has 75,972 stops and 3114 routes.",
+      "scoring_criteria": "Must state approximately 75,972 stops and 3114 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0181"
+    },
+    {
+      "question": "How large is the Transperth transit network in terms of stops and routes?",
+      "expected_answer": "The Transperth network has 14,878 stops and 433 routes.",
+      "scoring_criteria": "Must state approximately 14,878 stops and 433 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0182"
+    },
+    {
+      "question": "How large is the Rejseplanen transit network in terms of stops and routes?",
+      "expected_answer": "The Rejseplanen network has 36,323 stops and 1610 routes.",
+      "scoring_criteria": "Must state approximately 36,323 stops and 1610 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0183"
+    },
+    {
+      "question": "How large is the Valley Metro (VM) transit network in terms of stops and routes?",
+      "expected_answer": "The Valley Metro (VM) network has 8,027 stops and 112 routes.",
+      "scoring_criteria": "Must state approximately 8,027 stops and 112 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0184"
+    },
+    {
+      "question": "How large is the Capital Metro transit network in terms of stops and routes?",
+      "expected_answer": "The Capital Metro network has 2,343 stops and 70 routes.",
+      "scoring_criteria": "Must state approximately 2,343 stops and 70 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0185"
+    },
+    {
+      "question": "How large is the TriMet, Portland Streetcar transit network in terms of stops and routes?",
+      "expected_answer": "The TriMet, Portland Streetcar network has 6,478 stops and 112 routes.",
+      "scoring_criteria": "Must state approximately 6,478 stops and 112 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0186"
+    },
+    {
+      "question": "How large is the Los Angeles County Metropolitan Transportation Authority (LA Metro) transit network in terms of stops and routes?",
+      "expected_answer": "The Los Angeles County Metropolitan Transportation Authority (LA Metro) network has 11,892 stops and 114 routes.",
+      "scoring_criteria": "Must state approximately 11,892 stops and 114 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0187"
+    },
+    {
+      "question": "How large is the Chicago Transit Authority (CTA) transit network in terms of stops and routes?",
+      "expected_answer": "The Chicago Transit Authority (CTA) network has 11,177 stops and 133 routes.",
+      "scoring_criteria": "Must state approximately 11,177 stops and 133 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0188"
+    },
+    {
+      "question": "How large is the Massachusetts Bay Transportation Authority (MBTA) transit network in terms of stops and routes?",
+      "expected_answer": "The Massachusetts Bay Transportation Authority (MBTA) network has 10,308 stops and 403 routes.",
+      "scoring_criteria": "Must state approximately 10,308 stops and 403 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0189"
+    },
+    {
+      "question": "How large is the NMBS/SNCB Belgian Railways transit network in terms of stops and routes?",
+      "expected_answer": "The NMBS/SNCB Belgian Railways network has 2,871 stops and 1376 routes.",
+      "scoring_criteria": "Must state approximately 2,871 stops and 1376 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0190"
+    },
+    {
+      "question": "How large is the Toronto Transit Commission (TTC) transit network in terms of stops and routes?",
+      "expected_answer": "The Toronto Transit Commission (TTC) network has 9,349 stops and 235 routes.",
+      "scoring_criteria": "Must state approximately 9,349 stops and 235 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0191"
+    },
+    {
+      "question": "How large is the Verkehrsverbund Berlin-Brandenburg (VBB) transit network in terms of stops and routes?",
+      "expected_answer": "The Verkehrsverbund Berlin-Brandenburg (VBB) network has 42,061 stops and 1298 routes.",
+      "scoring_criteria": "Must state approximately 42,061 stops and 1298 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0192"
+    },
+    {
+      "question": "How large is the HSL Helsinki Region Transport transit network in terms of stops and routes?",
+      "expected_answer": "The HSL Helsinki Region Transport network has 8,383 stops and 466 routes.",
+      "scoring_criteria": "Must state approximately 8,383 stops and 466 routes",
+      "difficulty": "easy",
+      "category": "transit_operations",
+      "id": "BM-0193"
+    }
+  ]
+}
