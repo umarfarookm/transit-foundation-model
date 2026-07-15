@@ -104,4 +104,4 @@ Fine-tuning on 2,971 transit-specific Q&A pairs produces measurable improvements
 
 ---
 
-*Generated from benchmark evaluation results. Full prediction data available in `evaluation/results/`.*
+*Results generated using `evaluation/evaluate.py` against `evaluation/benchmark.json` (193 questions). To reproduce, run the benchmark on Google Colab using `evaluation/benchmark_eval_colab.ipynb`.*
