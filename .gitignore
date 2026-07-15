@@ -55,3 +55,6 @@ datasets/catalog/mobility_db_feeds.csv
 !datasets/catalog/seed_feeds.json
 !datasets/synthetic/train.jsonl
 !datasets/synthetic/test.jsonl
+
+# Evaluation results (raw JSON, large)
+evaluation/results/*.json
